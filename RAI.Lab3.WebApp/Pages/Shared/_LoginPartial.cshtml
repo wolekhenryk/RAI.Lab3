@@ -1,0 +1,43 @@
+@using Microsoft.AspNetCore.Identity
+@using RAI.Lab3.Domain.Models
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+@{
+    var displayName = "";
+    if (SignInManager.IsSignedIn(User))
+    {
+        var u = await UserManager.GetUserAsync(User);
+        displayName = u is not null
+            ? $"{u.FirstName} {u.LastName}".Trim()
+            : "";
+        if (string.IsNullOrWhiteSpace(displayName))
+            displayName = UserManager.GetUserName(User);
+    }
+}
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index">
+                @displayName
+            </a>
+        </li>
+        <li class="nav-item">
+            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                  asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                <button type="submit" class="nav-link btn btn-link">Logout</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        </li>
+    }
+</ul>

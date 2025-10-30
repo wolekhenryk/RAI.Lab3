@@ -1,0 +1,73 @@
+@page
+@model RAI.Lab3.WebApp.Pages.DeclareAvailability
+
+@{
+    ViewData["Title"] = "DeclareAvailability";
+}
+
+<h1>
+    Declare Availability
+</h1>
+
+<div class="row">
+    <div class="col">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Declare availability</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Input.RoomId" class="form-label">Room</label>
+                        <select asp-for="Input.RoomId" asp-items="Model.AvailableRooms" class="form-select">
+                            <option value="">-- Select a Room --</option>
+                        </select>
+                        <span asp-validation-for="Input.RoomId" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Input.StartDate" class="form-label">Start Date</label>
+                            <input asp-for="Input.StartDate" type="date" class="form-control" />
+                            <span asp-validation-for="Input.StartDate" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label asp-for="Input.EndDate" class="form-label">End Date</label>
+                            <input asp-for="Input.EndDate" type="date" class="form-control" />
+                            <span asp-validation-for="Input.EndDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Input.StartTime" class="form-label">Start Time</label>
+                            <input asp-for="Input.StartTime" type="time" class="form-control" />
+                            <span asp-validation-for="Input.StartTime" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label asp-for="Input.EndTime" class="form-label">End Time</label>
+                            <input asp-for="Input.EndTime" type="time" class="form-control" />
+                            <span asp-validation-for="Input.EndTime" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Input.SlotDurationMinutes" class="form-label">Slot Duration (minutes)</label>
+                        <input asp-for="Input.SlotDurationMinutes" type="number" class="form-control" min="1" step="1" />
+                        <span asp-validation-for="Input.SlotDurationMinutes" class="text-danger"></span>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Declare Availability</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

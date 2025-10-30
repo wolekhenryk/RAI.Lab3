@@ -1,0 +1,115 @@
+@page
+@model RAI.Lab3.WebApp.Pages.Rooms
+
+@{
+    ViewData["Title"] = "Rooms";
+}
+
+<h1>Rooms Management</h1>
+
+<div class="row">
+    <div class="col">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Add New Room</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    
+                    <div class="row d-flex mb-3">
+                        <div class="col-6">
+                            <label asp-for="Input.Name" class="form-label"></label>
+                            <input asp-for="Input.Name" class="form-control" />
+                            <span asp-validation-for="Input.Name" class="text-danger"></span>
+                        </div>
+                    
+                        <div class="col-6">
+                            <label asp-for="Input.Number" class="form-label"></label>
+                            <input asp-for="Input.Number" type="number" class="form-control" />
+                            <span asp-validation-for="Input.Number" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Add Room</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Rooms List</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.RoomsList.Any())
+                {
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Number</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var room in Model.RoomsList)
+                            {
+                                @if (Model.EditingRoomId == room.Id)
+                                {
+                                    <tr>
+                                        <td>
+                                            <form method="post" asp-page-handler="Update" id="updateForm_@room.Id">
+                                                <input type="hidden" name="roomId" value="@room.Id" />
+                                                <input type="text" name="name" value="@room.Name" class="form-control form-control-sm" required />
+                                            </form>
+                                        </td>
+                                        <td>
+                                            <input type="number" name="number" value="@room.Number" class="form-control form-control-sm" required form="updateForm_@room.Id" />
+                                        </td>
+                                        <td>
+                                            <button type="submit" form="updateForm_@room.Id" class="btn btn-sm btn-success">Save</button>
+                                            <form method="post" asp-page-handler="CancelEdit" class="d-inline ms-1">
+                                                <button type="submit" class="btn btn-sm btn-secondary">Cancel</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td>@room.Name</td>
+                                        <td>@room.Number</td>
+                                        <td>
+                                            <form method="post" asp-page-handler="Edit" class="d-inline">
+                                                <input type="hidden" name="roomId" value="@room.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-primary">Edit</button>
+                                            </form>
+                                            <form method="post" asp-page-handler="Delete" class="d-inline ms-1">
+                                                <input type="hidden" name="roomId" value="@room.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this room?');">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        No rooms available. Add a new room using the form above.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
