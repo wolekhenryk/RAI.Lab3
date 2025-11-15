@@ -13,6 +13,7 @@ public class TeacherAvailability : BaseDbEntity
     public NpgsqlRange<DateTime>[] Periods { get; set; } = [];
 
     public int SlotDurationMinutes { get; set; }
+    public bool IsBlocked { get; set; } = false;
 
     public virtual ICollection<Reservation> Reservations { get; set; } = [];
 }

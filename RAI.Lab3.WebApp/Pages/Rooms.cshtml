@@ -84,12 +84,24 @@
                                         <td>@room.Name</td>
                                         <td>@room.Number</td>
                                         <td>
-                                            <form method="post" asp-page-handler="Edit" class="d-inline">
+                                            <form method="post" asp-page-handler="ExportToTxt" class="d-inline">
                                                 <input type="hidden" name="roomId" value="@room.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-primary">Export .txt</button>
+                                            </form>
+                                            <form method="post" asp-page-handler="ExportToCsv" class="d-inline">
+                                                <input type="hidden" name="roomId" value="@room.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-primary">Export .csv</button>
+                                            </form>
+                                            <form method="post" asp-page-handler="ExportToPdf" class="d-inline">
+                                                <input type="hidden" name="roomId" value="@room.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-primary">Export .pdf</button>
+                                            </form>
+                                            <form method="post" asp-page-handler="Edit" class="d-inline">
+                                                <input type="hidden" name="roomId" value="@room.Id"/>
                                                 <button type="submit" class="btn btn-sm btn-outline-primary">Edit</button>
                                             </form>
                                             <form method="post" asp-page-handler="Delete" class="d-inline ms-1">
-                                                <input type="hidden" name="roomId" value="@room.Id" />
+                                                <input type="hidden" name="roomId" value="@room.Id"/>
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this room?');">Delete</button>
                                             </form>
                                         </td>

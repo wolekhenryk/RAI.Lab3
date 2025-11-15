@@ -9,4 +9,6 @@ public interface IAvailabilityService
         TeacherAvailabilityCreateDto availabilityCreateDto, CancellationToken ct = default);
 
     Task<Result<List<TeacherAvailabilityReadDto>>> GetAllAvailabilitiesAsync(CancellationToken ct = default);
+    Task<Result> BlockAvailabilityAsync(Guid availabilityId, CancellationToken ct = default);
+    Task<Result> UnblockAvailabilityAsync(Guid availabilityId, CancellationToken ct = default);
 }

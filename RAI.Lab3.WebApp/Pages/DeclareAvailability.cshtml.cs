@@ -11,6 +11,7 @@ namespace RAI.Lab3.WebApp.Pages;
 [Authorize(Roles = AppRoles.Teacher)]
 public class DeclareAvailability(
     IAvailabilityService availabilityService,
+    IReservationService reservationService,
     IRoomService roomService) : PageModel
 {
     [BindProperty]
@@ -38,6 +39,7 @@ public class DeclareAvailability(
         ModelState.Clear();
         Input = new TeacherAvailabilityCreateDto();
         await LoadRoomsAsync();
+        await LoadExistingAvailabilitiesAsync();
         
         return Page();
     }
@@ -45,6 +47,40 @@ public class DeclareAvailability(
     public async Task<IActionResult> OnGetAsync()
     {
         await LoadRoomsAsync();
+        await LoadExistingAvailabilitiesAsync();
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostDeleteSlotAsync(Guid slotId)
+    {
+        var deleteResult = await reservationService.DeleteReservationAsync(slotId);
+        if (!deleteResult.IsSuccess)
+            ModelState.AddModelError(string.Empty, deleteResult.Error?.Message ?? "An error occurred while deleting the reservation.");
+        
+        await LoadRoomsAsync();
+        await LoadExistingAvailabilitiesAsync();
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostBlockAvailabilityAsync(Guid availabilityId)
+    {
+        var blockResult = await availabilityService.BlockAvailabilityAsync(availabilityId);
+        if (!blockResult.IsSuccess)
+            ModelState.AddModelError(string.Empty, blockResult.Error?.Message ?? "An error occurred while blocking the availability.");
+        
+        await LoadRoomsAsync();
+        await LoadExistingAvailabilitiesAsync();
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostUnblockAvailabilityAsync(Guid availabilityId)
+    {
+        var unblockResult = await availabilityService.UnblockAvailabilityAsync(availabilityId);
+        if (!unblockResult.IsSuccess)
+            ModelState.AddModelError(string.Empty, unblockResult.Error?.Message ?? "An error occurred while unblocking the availability.");
+        
+        await LoadRoomsAsync();
+        await LoadExistingAvailabilitiesAsync();
         return Page();
     }
 
@@ -56,6 +92,15 @@ public class DeclareAvailability(
             AvailableRooms = roomsResult.Value
                 .Select(r => new SelectListItem { Value = r.Id.ToString(), Text = $"{r.Name} (Room {r.Number})" })
                 .ToList();
+        }
+    }
+    
+    private async Task LoadExistingAvailabilitiesAsync()
+    {
+        var availabilitiesResult = await availabilityService.GetAllAvailabilitiesAsync();
+        if (availabilitiesResult.IsSuccess)
+        {
+            ExistingAvailabilities = availabilitiesResult.Value;
         }
     }
 }

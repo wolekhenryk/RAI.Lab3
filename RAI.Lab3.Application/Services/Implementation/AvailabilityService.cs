@@ -57,4 +57,29 @@ public class AvailabilityService(
         var availabilityDtoList = availabilities.MapToReadDto();
         return Result<List<TeacherAvailabilityReadDto>>.Success(availabilityDtoList);
     }
+    public async Task<Result> BlockAvailabilityAsync(Guid availabilityId, CancellationToken ct = default)
+    {
+        var availability = await repository.GetByIdAsync(availabilityId, ct);
+        if (availability is null)
+            return Result.Failure(Errors.Db.NotFound());
+        
+        availability.IsBlocked = true;
+        repository.Update(availability);
+        await unitOfWork.SaveChangesAsync(ct);
+        
+        return Result.Success();
+    }
+
+    public async Task<Result> UnblockAvailabilityAsync(Guid availabilityId, CancellationToken ct = default)
+    {
+        var availability = await repository.GetByIdAsync(availabilityId, ct);
+        if (availability is null)
+            return Result.Failure(Errors.Db.NotFound());
+        
+        availability.IsBlocked = false;
+        repository.Update(availability);
+        await unitOfWork.SaveChangesAsync(ct);
+        
+        return Result.Success();
+    }
 }

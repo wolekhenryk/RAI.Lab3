@@ -1,0 +1,145 @@
+@page
+@model RAI.Lab3.WebApp.Pages.SignUpForProject
+
+@{
+    ViewData["Title"] = "Sign Up For Project";
+}
+
+<h1>
+    Sign Up For Project
+</h1>
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (!Model.AvailableSlots.Any())
+{
+    <div class="alert alert-info">
+        <p class="mb-0">No available slots at the moment. Please check back later.</p>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col">
+            @foreach (var availability in Model.AvailableSlots)
+            {
+                <div class="card mb-4">
+                    <div class="card-header d-flex align-items-center">
+                        <h5 class="card-title mb-0 me-auto">
+                            <strong>@availability.TeacherFullName</strong> - Room @availability.RoomName
+                        </h5>
+                        <div>
+                            <span class="badge text-bg-primary me-1">@availability.Reservations.Count Total</span>
+                            <span class="badge text-bg-success me-1">@availability.Reservations.Count(r => !r.IsReserved) Available</span>
+                            <span class="badge text-bg-info">@availability.Reservations.Count(r => r.IsReserved) Taken</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">
+                            Available from @availability.StartDate.ToDateTime(TimeOnly.MinValue).ToString("d") @DateTime.Today.Add(availability.StartTime.ToTimeSpan()).ToString("t")
+                            to @availability.EndDate.ToDateTime(TimeOnly.MinValue).ToString("d") @DateTime.Today.Add(availability.EndTime.ToTimeSpan()).ToString("t")
+                        </p>
+
+                        @{
+                            var accordionId = $"accordion-{availability.Id}";
+                            var itemIndex = 0;
+                        }
+                        <div class="accordion" id="@accordionId">
+                            @foreach (var slotsForDay in availability.Reservations
+                                                  .GroupBy(r => DateOnly.FromDateTime(r.StartLocal))
+                                                  .OrderBy(g => g.Key))
+                            {
+                                var collapseId = $"collapse-{availability.Id}-{itemIndex}";
+                                var isFirstItem = itemIndex == 0;
+                                itemIndex++;
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button @(isFirstItem ? "" : "collapsed")" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#@collapseId"
+                                                aria-expanded="@(isFirstItem ? "true" : "false")"
+                                                aria-controls="@collapseId">
+                                            <span class="me-auto">
+                                                @slotsForDay.Key.ToDateTime(TimeOnly.MinValue).ToString("D")
+                                            </span>
+                                            <span class="badge text-bg-success me-2">
+                                                @slotsForDay.Count(r => !r.IsReserved) available
+                                            </span>
+                                        </button>
+                                    </h2>
+                                    <div id="@collapseId" class="accordion-collapse collapse @(isFirstItem ? "show" : "")"
+                                         data-bs-parent="#@accordionId">
+                                        <div class="accordion-body">
+                                            <table class="table table-striped table-hover">
+                                                <thead>
+                                                <tr>
+                                                    <th>Time Slot</th>
+                                                    <th>Status</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                @foreach (var slot in slotsForDay.OrderBy(r => r.StartLocal))
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <strong>@slot.StartLocal.ToString("t")</strong> - @slot.EndLocal.ToString("t")
+                                                        </td>
+                                                        <td>
+                                                            @if (slot.IsReserved)
+                                                            {
+                                                                <span class="badge text-bg-secondary">Taken</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge text-bg-success">Available</span>
+                                                            }
+                                                        </td>
+                                                        <td>
+                                                            @if (!slot.IsReserved)
+                                                            {
+                                                                <form method="post" asp-page-handler="SignUp" style="display: inline;">
+                                                                    <input type="hidden" name="slotId" value="@slot.Id"/>
+                                                                    <button type="submit" class="btn btn-sm btn-primary">
+                                                                        Sign Up
+                                                                    </button>
+                                                                </form>
+                                                            }
+                                                            else
+                                                            {
+                                                                <button class="btn btn-sm btn-secondary" disabled>
+                                                                    Already Taken
+                                                                </button>
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <style>
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: rgba(0,0,0,.125);
+        }
+    </style>
+}

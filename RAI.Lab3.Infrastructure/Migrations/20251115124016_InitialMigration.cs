@@ -186,6 +186,7 @@ namespace RAI.Lab3.Infrastructure.Migrations
                     room_id = table.Column<Guid>(type: "uuid", nullable: false),
                     periods = table.Column<NpgsqlRange<DateTime>[]>(type: "tstzmultirange", nullable: false),
                     slot_duration_minutes = table.Column<int>(type: "integer", nullable: false),
+                    is_blocked = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     created_at_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>

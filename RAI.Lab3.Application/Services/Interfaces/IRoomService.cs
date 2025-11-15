@@ -13,4 +13,8 @@ public interface IRoomService
         CancellationToken ct = default);
 
     Task<Result> DeleteRoomAsync(Guid id, CancellationToken ct = default);
+    
+    Task<byte[]> ExportToTxtAsync(Guid roomId, CancellationToken ct = default);
+    Task<byte[]> ExportToCsvAsync(Guid roomId, CancellationToken ct = default);
+    Task<byte[]> ExportToPdfAsync(Guid roomId, CancellationToken ct = default);
 }

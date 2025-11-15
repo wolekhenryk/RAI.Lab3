@@ -60,8 +60,10 @@ public static class AvailabilityMapping
             EndDate = DateOnly.FromDateTime(endDateTime),
             StartTime = TimeOnly.FromDateTime(startDateTime),
             EndTime = TimeOnly.FromDateTime(endDateTime),
-            AmountOfSlots = availability.Periods.Length,
-            AmountOfReservations = availability.Reservations.Count
+            IsBlocked = availability.IsBlocked,
+            Reservations = availability.Reservations
+                .Select(r => r.MapToReadDto())
+                .ToList()
         };
     }
 

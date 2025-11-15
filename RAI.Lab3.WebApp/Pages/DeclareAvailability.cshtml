@@ -18,7 +18,7 @@
             <div class="card-body">
                 <form method="post">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    
+
                     <div class="mb-3">
                         <label asp-for="Input.RoomId" class="form-label">Room</label>
                         <select asp-for="Input.RoomId" asp-items="Model.AvailableRooms" class="form-select">
@@ -26,41 +26,41 @@
                         </select>
                         <span asp-validation-for="Input.RoomId" class="text-danger"></span>
                     </div>
-                    
+
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label asp-for="Input.StartDate" class="form-label">Start Date</label>
-                            <input asp-for="Input.StartDate" type="date" class="form-control" />
+                            <input asp-for="Input.StartDate" type="date" class="form-control"/>
                             <span asp-validation-for="Input.StartDate" class="text-danger"></span>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <label asp-for="Input.EndDate" class="form-label">End Date</label>
-                            <input asp-for="Input.EndDate" type="date" class="form-control" />
+                            <input asp-for="Input.EndDate" type="date" class="form-control"/>
                             <span asp-validation-for="Input.EndDate" class="text-danger"></span>
                         </div>
                     </div>
-                    
+
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label asp-for="Input.StartTime" class="form-label">Start Time</label>
-                            <input asp-for="Input.StartTime" type="time" class="form-control" />
+                            <input asp-for="Input.StartTime" type="time" class="form-control"/>
                             <span asp-validation-for="Input.StartTime" class="text-danger"></span>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <label asp-for="Input.EndTime" class="form-label">End Time</label>
-                            <input asp-for="Input.EndTime" type="time" class="form-control" />
+                            <input asp-for="Input.EndTime" type="time" class="form-control"/>
                             <span asp-validation-for="Input.EndTime" class="text-danger"></span>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label asp-for="Input.SlotDurationMinutes" class="form-label">Slot Duration (minutes)</label>
-                        <input asp-for="Input.SlotDurationMinutes" type="number" class="form-control" min="1" step="1" />
+                        <input asp-for="Input.SlotDurationMinutes" type="number" class="form-control" min="1" step="1"/>
                         <span asp-validation-for="Input.SlotDurationMinutes" class="text-danger"></span>
                     </div>
-                    
+
                     <button type="submit" class="btn btn-primary">Declare Availability</button>
                 </form>
             </div>
@@ -68,6 +68,122 @@
     </div>
 </div>
 
+<div class="row">
+    <div class="col">
+        @foreach (var availability in Model.ExistingAvailabilities)
+        {
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center">
+                    <h5 class="card-title mb-0 me-auto">
+                        Room @availability.RoomName,
+                        from @availability.StartDate.ToDateTime(TimeOnly.MinValue).ToString("d") @DateTime.Today.Add(availability.StartTime.ToTimeSpan()).ToString("t"),
+                        to @availability.EndDate.ToDateTime(TimeOnly.MinValue).ToString("d") @DateTime.Today.Add(availability.EndTime.ToTimeSpan()).ToString("t").
+                    </h5>
+                    <div>
+                        <span class="badge text-bg-primary me-1">@availability.Reservations.Count Total</span>
+                        <span class="badge text-bg-success me-1">@availability.Reservations.Count(r => !r.IsReserved) Free</span>
+                        <span class="badge text-bg-info">@availability.Reservations.Count(r => r.IsReserved) Taken</span>
+                        @if (availability.IsBlocked)
+                        {
+                            <span class="badge text-bg-danger ms-1">Blocked</span>
+                        }
+                    </div>
+                    <div class="ms-2">
+                        @if (availability.IsBlocked)
+                        {
+                            <form method="post" asp-page-handler="UnblockAvailability" style="display: inline;">
+                                <input type="hidden" name="availabilityId" value="@availability.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-success">
+                                    Unblock period
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form method="post" asp-page-handler="BlockAvailability" style="display: inline;">
+                                <input type="hidden" name="availabilityId" value="@availability.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-warning">
+                                    Block period
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+                    @{
+                        var accordionId = $"accordion-{availability.Id}";
+                        var itemIndex = 0;
+                    }
+                    <div class="accordion" id="@accordionId">
+                        @foreach (var slotsForDay in availability.Reservations
+                                          .GroupBy(r => DateOnly.FromDateTime(r.StartLocal))
+                                          .OrderBy(g => g.Key))
+                        {
+                            var collapseId = $"collapse-{availability.Id}-{itemIndex}";
+                            itemIndex++;
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#@collapseId"
+                                            aria-controls="@collapseId">
+                                        <span class="me-auto">@slotsForDay.Key.ToDateTime(TimeOnly.MinValue).ToString("D")</span>
+                                    </button>
+                                </h2>
+                                <div id="@collapseId" class="accordion-collapse collapse"
+                                     data-bs-parent="#@accordionId">
+                                    <div class="accordion-body">
+                                        <table class="table table-striped">
+                                            <thead>
+                                            <th>
+                                                Slot
+                                            </th>
+                                            <th>Status</th>
+                                            <th>Delete</th>
+                                            </thead>
+                                            <tbody>
+                                            @foreach (var slot in slotsForDay.OrderBy(r => r.StartLocal))
+                                            {
+                                                <tr>
+                                                    <td>@slot.StartLocal.ToString("t") - @slot.EndLocal.ToString("t")</td>
+                                                    <td>
+                                                        @if (slot.IsReserved)
+                                                        {
+                                                            @($"Taken by {slot.StudentFullName}")
+                                                        }
+                                                        else
+                                                        {
+                                                            <em class="text-success">Available</em>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        <form method="post" asp-page-handler="DeleteSlot" style="display: inline;">
+                                                            <input type="hidden" name="slotId" value="@slot.Id" />
+                                                            <button type="submit" class="btn btn-outline-danger">
+                                                                Delete
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <partial name="_ValidationScriptsPartial"/>
+    <style>
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: rgba(0,0,0,.125);
+        }
+    </style>
 }

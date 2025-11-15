@@ -96,16 +96,34 @@ public class Rooms(IRoomService roomService) : PageModel
     public async Task<IActionResult> OnPostDeleteAsync(Guid roomId)
     {
         var result = await roomService.DeleteRoomAsync(roomId);
-        
+
         if (!result.IsSuccess)
         {
             ModelState.AddModelError(string.Empty, result.Error.Message);
         }
-        
+
         await LoadRoomsAsync();
         return Page();
     }
+
+    public async Task<IActionResult> OnPostExportToCsvAsync(Guid roomId)
+    {
+        var fileBytes = await roomService.ExportToCsvAsync(roomId);
+        return File(fileBytes, "text/csv", $"room_{roomId}.csv");
+    }
     
+    public async Task<IActionResult> OnPostExportToPdfAsync(Guid roomId)
+    {
+        var fileBytes = await roomService.ExportToPdfAsync(roomId);
+        return File(fileBytes, "application/pdf", $"room_{roomId}.pdf");
+    }
+
+    public async Task<IActionResult> OnPostExportToTxtAsync(Guid roomId)
+    {
+        var fileBytes = await roomService.ExportToTxtAsync(roomId);
+        return File(fileBytes, "text/plain", $"room_{roomId}.txt");
+    }
+
     private async Task LoadRoomsAsync()
     {
         var result = await roomService.GetAllRoomsAsync();

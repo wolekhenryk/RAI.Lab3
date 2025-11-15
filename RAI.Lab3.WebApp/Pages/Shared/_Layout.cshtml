@@ -18,8 +18,8 @@
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
+            <div class="navbar-collapse collapse d-sm-inline-flex">
+                <ul class="navbar-nav">
                     @if (User.IsInRole(AppRoles.Teacher))
                     {
                         <li class="nav-item">
@@ -32,9 +32,38 @@
                     else if (User.IsInRole(AppRoles.Student))
                     {
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-page="/Privacy">Privacy</a>
+                            <a class="nav-link" asp-area="" asp-page="/SignUpForProject">Sign up for project defense</a>
                         </li>
                     }
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="cultureDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            @{
+                                var currentCulture = System.Globalization.CultureInfo.CurrentCulture.Name;
+                                var cultureName = currentCulture == "pl-PL" ? "Polski" : "English";
+                            }
+                            @cultureName
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="cultureDropdown">
+                            <li>
+                                <a class="dropdown-item @(currentCulture == "pl-PL" ? "active" : "")"
+                                   asp-page="/SetCulture"
+                                   asp-route-culture="pl-PL"
+                                   asp-route-returnUrl="@Context.Request.Path">
+                                    Polski
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item @(currentCulture == "en-US" ? "active" : "")"
+                                   asp-page="/SetCulture"
+                                   asp-route-culture="en-US"
+                                   asp-route-returnUrl="@Context.Request.Path">
+                                    English
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
                 <partial name="_LoginPartial" />
             </div>

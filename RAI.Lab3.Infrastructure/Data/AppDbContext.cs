@@ -123,17 +123,13 @@ public class AppDbContext(
                 .WithOne(r => r.TeacherAvailability)
                 .HasForeignKey(r => r.TeacherAvailabilityId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            eb.Property(ta => ta.IsBlocked)
+                .HasDefaultValue(false);
         });
-
-        // QFs
+        
         builder.Entity<TeacherAvailability>()
-            .HasQueryFilter(ta =>
-                ta.TeacherId == currentUserService.UserId && currentUserService.UserRole == AppRoles.Teacher);
-
-        builder.Entity<Reservation>()
-            .HasQueryFilter(r =>
-                r.StudentId == currentUserService.UserId ||
-                r.TeacherAvailability.TeacherId == currentUserService.UserId);
+            .HasQueryFilter(ta => ta.TeacherId == currentUserService.UserId || currentUserService.UserRole == AppRoles.Student);
     }
 
     public async Task EnsureConstraintsCreatedAsync(CancellationToken cancellationToken = default) =>

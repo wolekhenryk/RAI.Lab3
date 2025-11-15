@@ -9,6 +9,6 @@ public class TeacherAvailabilityReadDto
     public DateOnly EndDate { get; set; }
     public TimeOnly StartTime { get; set; }
     public TimeOnly EndTime { get; set; }
-    public int AmountOfSlots { get; set; }
-    public int AmountOfReservations { get; set; }
+    public bool IsBlocked { get; set; }
+    public List<ReservationReadDto> Reservations { get; set; } = [];
 }
