@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,6 +19,7 @@ using RAI.Lab3.Infrastructure.Helpers;
 using RAI.Lab3.Infrastructure.Repositories.Implementation;
 using RAI.Lab3.Infrastructure.Repositories.Interfaces;
 using RAI.Lab3.Infrastructure.Security;
+using RAI.Lab3.WebApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,11 +52,12 @@ builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
 builder.Services.AddScoped<IReservationService, ReservationService>();
+builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
 
 builder.Services.AddDefaultIdentity<User>(options =>
     {
-        options.SignIn.RequireConfirmedAccount = false;
-        options.SignIn.RequireConfirmedEmail = false;
+        options.SignIn.RequireConfirmedAccount = true;
+        options.SignIn.RequireConfirmedEmail = true;
     })
     .AddRoles<IdentityRole<Guid>>()
     .AddEntityFrameworkStores<AppDbContext>()
